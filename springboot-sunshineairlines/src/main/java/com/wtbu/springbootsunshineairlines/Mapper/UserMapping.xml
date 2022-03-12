@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wtbu.springbootsunshineairlines.Dao.UserDao">
+
+    <select id="userlist" resultType="HashMap">
+        select *
+        from users
+        where FirstName like concat('%' #{name} '%')
+            or LastName like concat('%' #{name} '%')
+            and RoleId = #{roleId} limit #{page},#{pageSize};
+    </select>
+
+    <select id="getEmailandPassword" parameterType="HashMap" resultType="HashMap">
+        select *
+        from users
+        where email=#{email}
+            and password=#{password}
+    </select>
+
+    <select id="getEmail" parameterType="HashMap" resultType="HashMap">
+        select *
+        from users
+        where email=#{email}
+    </select>
+
+    <insert id="addUser" parameterType="HashMap">
+        insert into users (Email,Password,FirstName,LastName,Gender,DateOfBirth,Phone,Photo,Address,RoleId)
+        value (#{email},#{password},#{firstName},#{lastName},#{gender},#{dateOfBirth},#{phone},#{photo},#{address},#{roleId});
+    </insert>
+
+    <select id="getEmailByUserId" parameterType="HashMap" resultType="HashMap">
+        select Email
+        from users
+        where Email=#{email}
+            and UserId!=#{userId};
+    </select>
+
+    <update id="updateUser" parameterType="HashMap">
+        update users
+        set Email=#{email},FirstName=#{firstName},LastName=#{lastName},Gender=#{gender},DateOfBirth=#{dateOfBirth},Phone=#{phone},Photo=#{photo},Address=#{address},RoleId=#{roleId}
+        where UserId = #{userId};
+    </update>
+
+    <select id="getUserByUserId" parameterType="HashMap" resultType="HashMap">
+        select *
+        from users
+        where UserId=#{userId}
+    </select>
+
+    <select id="getUserInfo" parameterType="Integer" resultType="HashMap">
+        select *
+        from users
+        where UserId=#{userId}
+    </select>
+
+</mapper>

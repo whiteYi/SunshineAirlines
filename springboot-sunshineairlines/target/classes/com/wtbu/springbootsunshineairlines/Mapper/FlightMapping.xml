@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wtbu.springbootsunshineairlines.Dao.FlightDao">
+
+    <select id="getFlightStatus" parameterType="HashMap" resultType="HashMap">
+        select  s1.scheduleId as ScheduleId,
+                FlightNumber,
+                Date,
+                Gate,
+                Time,
+                EconomyPrice,
+                route.FlightTime as FlightTime,
+                departcity.citycode as departcitycode,
+                departcity.cityname as departcityname,
+                arrivecity.citycode as arrivecitycode,
+                arrivecity.cityname as arrivecityname,
+                FlightStatus.ActualArrivalTime as ActualArrivalTime
+        from schedule as s1
+                left join route on s1.RouteId=route.RouteId
+                left join airport as departairport on route.DepartureAirportIATA=departairport.IATACode
+                left join airport as arriveairport on route.ArrivalAirportIATA=arriveairport.IATACode
+                left join city as departcity on departcity.citycode=departcity.citycode
+                left join city as arrivecity on arrivecity.citycode=arrivecity.citycode
+                left join FlightStatus on FlightStatus.scheduleId=s1.scheduleId
+        where s1.date between #{startDepartureDate} and #{endDepartureDate} limit #{page},#{pageSize};
+    </select>
+
+
+    <select id="getSchedule" parameterType="HashMap" resultType="HashMap">
+        select  s1.scheduleId as ScheduleId,
+                FlightNumber,
+                Date,
+                Gate,
+                Time,
+                EconomyPrice,
+                route.FlightTime as FlightTime,
+                departcity.citycode as departcitycode,
+                departcity.cityname as departcityname,
+                arrivecity.citycode as arrivecitycode,
+                arrivecity.cityname as arrivecityname,
+                Name,
+                Status
+        from schedule as s1
+            left join route on s1.RouteId=route.RouteId
+            left join airport as departairport on route.DepartureAirportIATA=departairport.IATACode
+            left join airport as arriveairport on route.ArrivalAirportIATA=arriveairport.IATACode
+            left join city as departcity on departcity.citycode=departcity.citycode
+            left join city as arrivecity on arrivecity.citycode=arrivecity.citycode
+            left join Aircraft on Aircraft.AircraftId=s1.AircraftId
+        where departcity.cityname=#{fromCity} and arrivecity.cityname=#{toCity} and (s1.date between #{startDate} and #{endDate});
+    </select>
+
+    <select id="getScheduleByScheduleId" parameterType="HashMap" resultType="HashMap">
+        select * from schedule where ScheduleId = #{scheduleId}
+    </select>
+
+    <update id="updateSchedule" parameterType="HashMap">
+        update schedule set Status=#{status} where ScheduleId=#{scheduleId}
+    </update>
+
+    <select id="findScheduleByScheduleId" parameterType="Integer" resultType="HashMap" >
+
+        select  s1.*,route.*,Aircraft.*
+        from schedule as s1
+            left join route on s1.RouteId=route.RouteId
+            left join Aircraft on Aircraft.AircraftId=s1.AircraftId
+        where ScheduleId = #{scheduleId};
+
+    </select>
+
+    <select id="findTicketsByScheduleId" parameterType="Integer" resultType="HashMap">
+
+        select ScheduleId, FlightReservation.cabintypeId, cabintype.CabinTypeName,count(*)AS counts
+        FROM FlightReservation
+            left join  cabintype on cabintype.cabintypeId=FlightReservation.cabintypeId
+        where ScheduleId= #{scheduleId} GROUP BY CabinTypeId ;
+
+    </select>
+
+    <select id="findSeatByScheduleId" parameterType="Integer" resultType="HashMap">
+
+        select f.cabintypeId,RowNumber,ColumnName,AircraftId
+        from FlightReservation as f
+            left join SeatLayout on SeatLayout.id=f.SeatLayoutId
+        where ScheduleId = #{scheduleId};
+
+    </select>
+
+    <select id="findSeatByAircraftId" parameterType="Integer" resultType="HashMap">
+
+        select * from seatlayout where AircraftId = #{aircraftId};
+
+    </select>
+
+</mapper>
